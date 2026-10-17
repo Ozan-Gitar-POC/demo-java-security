@@ -15,6 +15,9 @@ import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class Utils {
 
@@ -30,14 +33,30 @@ public class Utils {
     }
 
     public static void deleteFile(String fileName) throws IOException {
-        File file = new File(fileName);
-        FileUtils.forceDelete(file);
+        String baseDirectory = new File(".").getCanonicalPath() + File.separator;
+        File file = new File(baseDirectory, fileName);
+        String canonicalPath = file.getCanonicalPath();
+        if (!canonicalPath.startsWith(baseDirectory)) {
+            throw new IOException("Entry is outside of the target directory");
+        }
+        FileUtils.forceDelete(new File(canonicalPath));
     }
+
+    private static final List<String> ALLOWED_SCRIPTS = Collections.unmodifiableList(Arrays.asList(
+            "1 + 1",
+            "new Date().toString()"
+    ));
 
     public static void executeJs(String input) throws ScriptException {
         ScriptEngineManager manager = new ScriptEngineManager();
         ScriptEngine engine = manager.getEngineByName("JavaScript");
-        engine.eval(input);
+        for (String allowedScript : ALLOWED_SCRIPTS) {
+            if (allowedScript.equals(input)) {
+                engine.eval(allowedScript);
+                return;
+            }
+        }
+        throw new ScriptException("Script is not allowed");
     }
 
     public static void encrypt(byte[] key, byte[] ptxt) throws Exception {
