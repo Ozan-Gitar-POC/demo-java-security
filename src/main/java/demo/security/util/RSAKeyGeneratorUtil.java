@@ -1,9 +1,12 @@
 package demo.security.util;
 
 import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.Random;
 
 public class RSAKeyGeneratorUtil {
+
+    private static final Random RANDOM = new SecureRandom();
 
     private BigInteger p;
     private BigInteger q;
@@ -19,7 +22,7 @@ public class RSAKeyGeneratorUtil {
     }
 
     private void generateKeys() {
-        Random rnd = new Random();
+        Random rnd = RANDOM;
         // Generate two distinct random primes of bitLength/2 bits
         p = generatePrime(bitLength / 2, rnd);
         q = generatePrime(bitLength / 2, rnd);
